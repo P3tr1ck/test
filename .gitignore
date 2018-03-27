@@ -1,32 +1,73 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+#include<algorithm>
+#include<cstring>
+#include<cstdio>
+#include<iostream>
+#include<vector>
+#include<stack>
+using namespace std;
+const int Max = 1000;
+vector<int> G[Max];
+int dfn[Max],low[Max],color[Max];
+int sig,ct;
+int V;
+stack<int> st;
+bool instack[Max];
+void add_arc(int f,int t){
+	G[f].push_back(t);
+}
+void init(){
+	while(!st.empty())
+		st.pop();
+	for(int i=0;i<V;i++)
+		G[i].clear();
+	memset(dfn,0,sizeof(dfn));
+	memset(color,-1,sizeof(color));
+	memset(instack,0,sizeof(instack));
+	sig=ct=0;
+}
+void tarjan(int u){
+	int v;
+	dfn[u]=low[u]=++ct;
+	instack[u]=1;
+	st.push(u);
+	for(int i=0;i<G[u].size();i++){
+		v=G[u][i];
+		if(!dfn[v]){
+			tarjan(v);
+			low[u]=min(low[u],low[v]);
+		} else if (instack[v]) {
+			low[u]=min(low[u],dfn[v]);
+		} 
+	}
+	
+	if(low[u]==dfn[u]){  //说明u是根 
+		++sig;
+		do{
+			v=st.top();
+			instack[v]=0;
+			color[v]=sig;
+			st.pop();
+		}while(u!=v);
+	}
+}
+int scc(){
+	for(int i=0;i<V;i++){
+		if(!dfn[i])
+			tarjan(i);
+	}
+	return sig;
+}
+int main(){
+	int N,M;
+	int f,t;
+	scanf("%d%d",&N,&M);
+	V=N;
+	init();
+	while(M--){
+		scanf("%d%d",&f,&t);
+		add_arc(f,t);	
+	}
+	int n=scc();
+	printf("%d\n",n);
+	return 0;
+} 
